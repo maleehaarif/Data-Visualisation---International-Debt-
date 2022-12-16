@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>      
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div id="bubble"></div>
+  
+  </head>
+
+  <body>
+   
+    <div style="width: 100%; display: flex">
+       <h3>Extended Debt Of All Countries- 2020</h3>
+    </div>
+    </div>
+    <script>
+ (function(){
+    var width=500;
+  var height=500;
+
+var svg=d3.select("#bubble")
+.append("svg")
+.attr("height",height)
+.attr("width",width)
+.append("g")
+.attr("transform","translate(50,50)")
+
+ var simulation=d3.forceSimulation()
+ .force("x",d3.forceX(width/2).strength(0.05))
+ .force("y",d3.forceY(height/2).strength(0.05))
+ .force("collide",d3.forceCollide(function(d){
+    return rscale(d.year) + 2;
+ }))
+
+ var rscale=d3.scaleSqrt().domain([123,2349388.6]).range([5,70])
+d3.queue()
+.defer(d3.csv,"data.csv")
+.await(debtCircle) 
+
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("background", "#FFFFFF")
+
+function debtCircle(error,datapoints){
+    var circles=svg.selectAll("circle")
+    .data(datapoints)
+    .enter().append("circle")
+    .attr("class","circle")
+    .attr("r",function(d){
+        return rscale(d.year)
+    })
+    .attr("fill","#CF9FFF")
+    .on("mouseover", function(d){
+        console.log(d);
+        tooltip.text(d.Country + " " +  d.year); 
+        return tooltip.style("visibility", "visible");})
+      .on("mousemove",
+       function(d){return tooltip.style("top", (d3.event.pageY-10)+"px")
+       .style("left",(d3.event.pageX+10)+"px");})
+      .on("mouseout", function(d)
+      {return tooltip.style("visibility", "hidden");});
+
+     simulation.nodes(datapoints)
+     .on('tick',ticked)
+
+     function ticked(){
+        circles.attr("cx",function(d){
+            return d.x
+        })
+        .attr("cy",function(d){
+            return d.y
+        })
+     }
+}
+})();
+
+  </script>
+  </body>
+
+
+</html> 
